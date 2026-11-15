@@ -165,7 +165,7 @@ export const uploadStuff = router({
                 gitUrl: true,
                 summary: true,
             })),
-            icon_1: zfd.file().refine(async (file) => await Validator.validateThumbnail(file), { message: "Invalid icon file format" }),
+            icon_1: zfd.file().refine(async (file) => await Validator.validateThumbnail(file), { message: "Invalid icon file format" }).optional(), // if omitted, the game's default icon is used
         }))
         .output(projectApiV3Schema)
         .mutation(async ({ ctx, input }) => {
@@ -177,7 +177,7 @@ export const uploadStuff = router({
                 throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have permission to create projects for this game.' });
             }
             let iconFile = input.icon_1;
-            let iconName = `${await getHashFromFile(iconFile)}${path.extname(iconFile.name)}`;
+            let iconName = iconFile ? `${await getHashFromFile(iconFile)}${path.extname(iconFile.name)}` : `default_${game.name}.png`;
 
             return await Project.create({
                 name: input.data.name,
@@ -204,7 +204,7 @@ export const uploadStuff = router({
                     });
                     throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create project folder. Please contact a site administrator.' });
                 }
-                await iconFile.arrayBuffer().then(async (buffer) => {
+                await iconFile?.arrayBuffer().then(async (buffer) => {
                     fs.writeFileSync(path.join(project.folderPath, iconName), Buffer.from(buffer));
                 }).catch((err) => {
                     Logger.error(`Error saving project icon file: ${err.message}`)

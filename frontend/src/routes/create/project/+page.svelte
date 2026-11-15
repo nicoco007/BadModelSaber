@@ -48,7 +48,7 @@
   let isGitUrlValid: boolean = $derived(zProject.shape.gitUrl.safeParse(projectGitUrl).success);
   let isThumbnailValid: boolean = $derived.by(() => {
     if (!projectThumbnail || projectThumbnail.length === 0) {
-      return false; // Thumbnail is optional
+      return true; // Thumbnail is optional, the game's default icon is used if omitted
     }
     const file = projectThumbnail[0];
     const validTypes = ["image/png", "image/jpeg", "image/webp", "image/gif"];

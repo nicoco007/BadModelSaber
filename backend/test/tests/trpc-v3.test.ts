@@ -397,6 +397,23 @@ describe(`v3`, () => {
             createdProjectForUploadId = response.id;
         });
 
+        test(`creates a project with the default icon when none is uploaded`, async () => {
+            const form = new FormData();
+            form.set("data", JSON.stringify({
+                name: `TRPC Upload Project No Icon`,
+                nameId: `trpc-upload-project-no-icon`,
+                description: `Upload project test without icon`,
+                category: `Other`,
+                gameName: `trpcmods`,
+                gitUrl: `https://example.com/project`,
+                summary: `Upload summary`,
+            }));
+
+            const response = await caller.v3.upload.projectCreate(form as any);
+            expect(projectApiV3Schema.safeParse(response).success).toBe(true);
+            expect(response.iconFileUrl).toContain(`/default-trpcmods.png`);
+        });
+
         test(`uploads a project version`, async () => {
             if (!createdProjectForUploadId) {
                 throw new Error(`Project upload test did not create a project.`);
