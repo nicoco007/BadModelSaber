@@ -55,7 +55,8 @@ export const uploadStuff = router({
                 sourceUrl: true,
                 tags: true,
             })),
-            immidateSubmit: zfd.checkbox().optional(), // if true, will immidately submit the asset for review after upload instead of saving as private 
+            immediateSubmit: zfd.checkbox().optional(), // if true, will immediately submit the asset for review after upload instead of saving as private
+            immidateSubmit: zfd.checkbox().optional(), // deprecated misspelled alias of immediateSubmit
             asset: zfd.file(), // main asset file, will be validated later based on type
             icon_1: zfd.file().refine((file) => Validator.validateThumbnail(file), { message: "Invalid icon file format" }),
             icon_2: zfd.file().refine((file) => Validator.validateThumbnail(file), { message: "Invalid icon file format" }).optional(),
@@ -142,8 +143,8 @@ export const uploadStuff = router({
                     });
                 }
                 Logger.debug(`Asset upload completed for user ${ctx.user?.id} with asset ID ${asset.id}`);
-                if (input.immidateSubmit) {
-                    await asset.setStatus(Status.Queue, ctx.user, "Asset immidately submitted for review by uploader").catch((err) => {
+                if (input.immediateSubmit || input.immidateSubmit) {
+                    await asset.setStatus(Status.Queue, ctx.user, "Asset immediately submitted for review by uploader").catch((err) => {
                         Logger.error(`Error setting asset status to queue: ${parseErrorMessage(err)}`);
                         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to submit asset for review. Please contact a site administrator.' });
                     });
@@ -230,7 +231,8 @@ export const uploadStuff = router({
                 supportedGameVersionIds: z.array(z.number()).nonempty(),
             })),
             modZip: zfd.file(), // main asset file, will be validated later based on type,
-            immidateSubmit: zfd.checkbox().optional(), // if true, will immidately submit the version for review after upload instead of saving as private
+            immediateSubmit: zfd.checkbox().optional(), // if true, will immediately submit the version for review after upload instead of saving as private
+            immidateSubmit: zfd.checkbox().optional(), // deprecated misspelled alias of immediateSubmit
         }))
         .output(versionApiV3Schema)
         .mutation(async ({ ctx, input }) => {
@@ -375,8 +377,8 @@ export const uploadStuff = router({
                     throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to save version mod file. Please contact a site administrator.' });
                 });
 
-                if (input.immidateSubmit) {
-                    await version.setStatus(Status.Queue, ctx.user, "Version immidately submitted for review by uploader").catch((err) => {
+                if (input.immediateSubmit || input.immidateSubmit) {
+                    await version.setStatus(Status.Queue, ctx.user, "Version immediately submitted for review by uploader").catch((err) => {
                         Logger.error(`Error setting version status to queue: ${parseErrorMessage(err)}`);
                         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to submit version for review. Please contact a site administrator.' });
                     });
@@ -405,8 +407,13 @@ export const OpenAPIUploadDocs: PathsObject = {
                                     format: "json",
                                     description: "JSON string containing the asset data, including type, name, description, license, licenseUrl (if applicable), sourceUrl, and tags. See the Asset shcema for more details."
                                 },
+                                immediateSubmit: {
+                                    type: "boolean",
+                                },
                                 immidateSubmit: {
                                     type: "boolean",
+                                    deprecated: true,
+                                    description: "Deprecated misspelled alias of immediateSubmit.",
                                 },
                                 asset: {
                                     type: "string",
@@ -484,8 +491,13 @@ export const OpenAPIUploadDocs: PathsObject = {
                                     type: "string",
                                     format: "binary",
                                 },
+                                immediateSubmit: {
+                                    type: "boolean",
+                                },
                                 immidateSubmit: {
                                     type: "boolean",
+                                    deprecated: true,
+                                    description: "Deprecated misspelled alias of immediateSubmit.",
                                 },
                             },
                             required: ["id", "data", "modZip"],

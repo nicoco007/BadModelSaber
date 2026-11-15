@@ -162,7 +162,7 @@
       }),
     );
     formData.append("modZip", file);
-    formData.append("immidateSubmit", `on`); // omit to not submit immidately, include to submit immidately
+    formData.append("immediateSubmit", `on`); // omit to not submit immediately, include to submit immediately
     await trpc.v3.upload.versionUpload
       .mutate(formData)
       .then(handleTrpcSuccessWithToast(m[`toasts.submit.success`](), false, (newVersion) => {
